@@ -26,7 +26,7 @@ export class BasePage {
     this.submit = page.locator('#submitButton');
     this.success = page.locator('#successMessage');
   }
-  
+
   // Common methods or properties for all pages can go here
   /**
    * Perform the login flow multiple times, asserting the success message each time.
@@ -36,7 +36,7 @@ export class BasePage {
     for (let i = 1; i <= iterations; i++) {
       const emailVal = `test${i}@example.com`;
       const passwordVal = `password${i}`;
-      // Ensure banner is hidden before starting the next attempt (prevents stale text)
+      // Ensure banner is hidden before starting the next attempt
       if (i > 1) {
         await expect(this.success, 'Wait for prior success banner to hide').toBeHidden();
       }
