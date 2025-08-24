@@ -7,7 +7,7 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 3 : 4, // Changed to 4 for local parallel runs
-  reporter: [['html', { open: 'never' }], ['dot'], ['list']],
+  reporter: [['html', { open: 'never' }], ['dot'], ['list']], // Added List for execution visibility
   timeout: 2 * 60 * 1000,
   expect: {
     timeout: 5 * 1000,
@@ -25,18 +25,17 @@ export default defineConfig({
   },
 
   projects: [
-    // {
-    //   name: 'chromium',
-    //   use: {
-    //     viewport: null,
-    //     launchOptions: {
-    //       args: ['--disable-web-security', '--start-maximized'],
-    //       slowMo: 0,
-    //       headless: false,
-    //     },
-    //   },
-    // },
-
+    {
+      name: 'chromium',
+      use: {
+        viewport: null,
+        launchOptions: {
+          args: ['--disable-web-security', '--start-maximized'],
+          slowMo: 0,
+          headless: false,
+        },
+      },
+    },
     {
       name: 'chromiumheadless',
       use: {

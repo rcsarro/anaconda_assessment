@@ -1,5 +1,5 @@
 import { expect, Page, Locator } from '@playwright/test';
-// BasePage for all challenge pages
+// BasePage for all common challenge pags elements
 export class BasePage {
   readonly page: Page;
   //NAVIGATION
@@ -28,6 +28,7 @@ export class BasePage {
   }
 
   // Common methods or properties for all pages can go here
+
   /**
    * Perform the login flow multiple times, asserting the success message each time.
    * @param iterations Number of login attempts
@@ -36,10 +37,12 @@ export class BasePage {
     for (let i = 1; i <= iterations; i++) {
       const emailVal = `test${i}@example.com`;
       const passwordVal = `password${i}`;
+      
       // Ensure banner is hidden before starting the next attempt
       if (i > 1) {
         await expect(this.success, 'Wait for prior success banner to hide').toBeHidden();
       }
+     
       // Fill and submit login form
       await expect(this.email).toBeVisible();
       await expect(this.password).toBeVisible();
@@ -47,9 +50,15 @@ export class BasePage {
       await this.password.fill(passwordVal);
       await expect(this.submit).toBeEnabled();
       await this.submit.click();
+      
       // Success message should appear for THIS attempt
       await expect(this.success).toBeVisible();
-      // Assert the Success message reflects the current inputs in the correct order
+      
+      /* Assert the Success message reflects the current inputs in the correct order
+      - Enforces message order: "Successfully submitted!",  "Email", "Password:".
+      - Tolerates markup/newlines via `[\s\S]*` between parts.
+      - Escapes dynamic values so special regex characters in the inputs are treated literally.
+ */
       const pattern = new RegExp(
         [
           'Successfully submitted!',
@@ -62,8 +71,4 @@ export class BasePage {
     }
   }
 
-  //navigate to a specific challenge page
-  async goto(url: string) {
-    await this.page.goto(url);
-  }
 }

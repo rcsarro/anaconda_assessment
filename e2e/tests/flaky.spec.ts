@@ -8,146 +8,137 @@ test.beforeEach(async ({ page }) => {
 
 //Fix the below scripts to work consistently and do not use static waits. Add proper assertions to the tests
 // Login 3 times sucessfully
-test('Login multiple times successfully @c1', async ({ page, basePage, challengeOnePage }) => {
-  /* Promise.all 
-    - Avoids race conditions, guarantees navigation on Challenge 1 page
-    - Ensures the test waits for the page to load before proceeding
-  */
-  await Promise.all([
-    page.waitForURL('**/challenge1.html'),
-    basePage.challengeOneLink.click(),
-  ]);
-  await expect(page).toHaveURL(/challenge1\.html$/);
+test('Login multiple times successfully @c1', async ({ page, basePage }) => {
+  await test.step('Navigate to Challenge 1 page', async () => {
+    await Promise.all([
+      page.waitForURL('**/challenge1.html'),
+      basePage.challengeOneLink.click(),
+    ]);
+    await expect(page).toHaveURL(/challenge1\.html$/);
+  });
 
-  // Use BasePage utility to perform login 3 times
-  await basePage.loginMultipleTimes(3);
+  await test.step('Perform 3 successful login attempts and assert success messages', async () => {
+    await basePage.loginMultipleTimes(3);
+  });
 });
 
 
 // Login and logout successfully with animated form and delayed loading
 test('Login animated form and logout sucessfully @c2', async ({ page, basePage, challengeTwoPage }) => {
 
-  /* Promise.all 
-    - Avoids race conditions, guarentees navigation on Challange 2 page
-    - Ensures the test waits for the page to load before proceeding
-  */
-  await Promise.all([ 
-    page.waitForURL('**/challenge2.html'),
-    basePage.challengeTwoLink.click(),
-  ]);
-  await expect(page).toHaveURL(/challenge2\.html$/);
-
-  //move to helper class later
-  const emailVal = `test@example.com`;
-  const passwordVal = `password`;
-
-  await expect(basePage.email).toBeVisible();
-  await expect(basePage.password).toBeVisible();
-  await basePage.email.fill(emailVal);
-  await basePage.password.fill(passwordVal);
-  await expect(basePage.submit).toBeVisible();
-
-  await basePage.submit.evaluate(el =>
-    Promise.all((el.getAnimations?.({ subtree: true }) ?? []).map(a => a.finished.catch(() => {})))
-  );
-  await basePage.submit.click();
-
-  // Wait for menu button to be enabled and visible before clicking
-  await expect(challengeTwoPage.menuBtn).toBeVisible();
-  await expect(challengeTwoPage.menuBtn).toBeEnabled();
-
-  // Wait for any menu button animation to finish before clicking
-  await challengeTwoPage.menuBtn.evaluate(el =>
-    Promise.all((el.getAnimations?.({ subtree: true }) ?? []).map(a => a.finished.catch(() => {})))
-  );
-  await challengeTwoPage.menuBtn.click();
-
-  // Wait for logoutOption to become truly visible after menu opens (not just in DOM)
-  await page.waitForFunction(() => {
-    const el = document.querySelector('#logoutOption');
-    if (!el) return false;
-    const style = window.getComputedStyle(el);
-    return style.visibility !== 'hidden' && style.display !== 'none' && el.offsetParent !== null;
+  await test.step('Navigate to Challenge 2 page', async () => {
+    await Promise.all([
+      page.waitForURL('**/challenge2.html'),
+      basePage.challengeTwoLink.click(),
+    ]);
+    await expect(page).toHaveURL(/challenge2\.html$/);
   });
 
-  await expect(challengeTwoPage.logoutOption).toBeVisible();
-  await challengeTwoPage.logoutOption.evaluate(el =>
-    Promise.all((el.getAnimations?.({ subtree: true }) ?? []).map(a => a.finished.catch(() => {})))
-  );
-  await challengeTwoPage.logoutOption.click();
+  await test.step('Login with animated form', async () => {
+    const emailVal = `test@example.com`;
+    const passwordVal = `password`;
+    await expect(basePage.email).toBeVisible();
+    await expect(basePage.password).toBeVisible();
+    await basePage.email.fill(emailVal);
+    await basePage.password.fill(passwordVal);
+    await expect(basePage.submit).toBeVisible();
+    await basePage.submit.evaluate(el =>
+      Promise.all((el.getAnimations?.({ subtree: true }) ?? []).map(a => a.finished.catch(() => {})))
+    );
+    await basePage.submit.click();
+  });
 
-  // Verify we’re logged out (e.g., login form back in view)
-  await expect(challengeTwoPage.email).toBeVisible();
+  await test.step('Open menu and logout', async () => {
+    // Wait for menu button to be enabled and visible before clicking
+    await expect(challengeTwoPage.menuBtn).toBeVisible();
+    await expect(challengeTwoPage.menuBtn).toBeEnabled();
+    // Wait for menu button to be initialized (menuClickable = true)
+    await expect(challengeTwoPage.menuBtn).toHaveAttribute('data-initialized', 'true');
+    await challengeTwoPage.menuBtn.click();
+    // Wait for logoutOption to become truly visible after menu opens (not just in DOM)
+    await page.waitForFunction(() => {
+      const el = document.querySelector('#logoutOption');
+      if (!el) return false;
+      const style = window.getComputedStyle(el);
+      return style.visibility !== 'hidden' && style.display !== 'none' && el.offsetParent !== null;
+    });
+    await expect(challengeTwoPage.logoutOption).toBeVisible();
+    await challengeTwoPage.logoutOption.evaluate(el =>
+      Promise.all((el.getAnimations?.({ subtree: true }) ?? []).map(a => a.finished.catch(() => {})))
+    );
+    await challengeTwoPage.logoutOption.click();
+  });
+
+  await test.step('Verify logout returns to login form', async () => {
+    await expect(challengeTwoPage.email).toBeVisible();
+  });
 });
 
 // Fix the Forgot password test and add proper assertions
 test('Forgot password @c3', async ({ page, basePage, challengeThreePage }) => {
-    /* Promise.all 
-    - Avoids race conditions, guarentees navigation on Challange 3 page
-    - Ensures the test waits for the page to load before proceeding
-  */
-  await Promise.all([
-    page.waitForURL('**/challenge3.html'),
-    basePage.challengeThreeLink.click(),
-  ]);
-  await expect(page).toHaveURL(/challenge3\.html$/);
+  await test.step('Navigate to Challenge 3 page', async () => {
+    await Promise.all([
+      page.waitForURL('**/challenge3.html'),
+      basePage.challengeThreeLink.click(),
+    ]);
+    await expect(page).toHaveURL(/challenge3\.html$/);
+  });
 
-  // Open forgot password form and wait for it to be visible
-  await challengeThreePage.forgotPasswordBtn.click();
-  const forgotForm = challengeThreePage.forgotForm;
-  await expect(forgotForm).toBeVisible();
+  await test.step('Open forgot password form and fill email', async () => {
+    await challengeThreePage.forgotPasswordBtn.click();
+    const forgotForm = challengeThreePage.forgotForm;
+    await expect(forgotForm).toBeVisible();
+    // Wait for the event handler to be attached (matches setTimeout in app code)
+    await page.waitForTimeout(150);
+    await expect(challengeThreePage.emailInput).toBeVisible();
+    await expect(challengeThreePage.emailInput).toBeEnabled();
+    await challengeThreePage.emailInput.focus();
+    await challengeThreePage.emailInput.fill('test1@example.com');
+    await challengeThreePage.emailInput.press('Enter');
+  });
 
-  // Wait for the event handler to be attached (matches setTimeout in app code)
-  await page.waitForTimeout(150);
-
-  // Wait for the email input to be visible and enabled (event handler should be attached)
-  await expect(challengeThreePage.emailInput).toBeVisible();
-  await expect(challengeThreePage.emailInput).toBeEnabled();
-  // Fill email and ensure field is focused
-  await challengeThreePage.emailInput.focus();
-  await challengeThreePage.emailInput.fill('test1@example.com');
-
-  // Submit the form by pressing Enter
-  await challengeThreePage.emailInput.press('Enter');
-
-  // Wait for the success message to appear
-  await expect(challengeThreePage.successMsg.locator('h3')).toHaveText('Success!');
-  await expect(challengeThreePage.successMsg).toContainText('Password reset link sent!');
-  await expect(challengeThreePage.successMsg).toContainText('test1@example.com');
+  await test.step('Assert forgot password success message', async () => {
+    await expect(challengeThreePage.successMsg.locator('h3')).toHaveText('Success!');
+    await expect(challengeThreePage.successMsg).toContainText('Password reset link sent!');
+    await expect(challengeThreePage.successMsg).toContainText('test1@example.com');
+  });
 });
 
 
 //Fix the login test. Hint: There is a global variable that you can use to check if the app is in ready state
 test('Login and logout @c4', async ({ page, basePage, challengeFourPage }) => {
-    /* Promise.all 
-    - Avoids race conditions, guarentees navigation on Challange 4 page
-    - Ensures the test waits for the page to load before proceeding
-  */
-  await Promise.all([
-    page.waitForURL('**/challenge4.html'),
-    basePage.challengeFourLink.click(),
-  ]);
-  await expect(page).toHaveURL(/challenge4\.html$/);
+  await test.step('Navigate to Challenge 4 page', async () => {
+    await Promise.all([
+      page.waitForURL('**/challenge4.html'),
+      basePage.challengeFourLink.click(),
+    ]);
+    await expect(page).toHaveURL(/challenge4\.html$/);
+  });
 
-  // Wait for application ready state (global variable)
-  await page.waitForFunction('window.isAppReady === true');
+  await test.step('Wait for application ready state', async () => {
+    await page.waitForFunction('window.isAppReady === true');
+  });
 
-  // Login
-  await expect(basePage.email).toBeVisible();
-  await expect(basePage.password).toBeVisible();
-  await basePage.email.fill('test@example.com');
-  await basePage.password.fill('password');
-  await expect(basePage.submit).toBeEnabled();
-  await basePage.submit.click();
+  await test.step('Login', async () => {
+    await expect(basePage.email).toBeVisible();
+    await expect(basePage.password).toBeVisible();
+    await basePage.email.fill('test@example.com');
+    await basePage.password.fill('password');
+    await expect(basePage.submit).toBeEnabled();
+    await basePage.submit.click();
+  });
 
-  // Profile interaction
-  await expect(challengeFourPage.profileBtn).toBeVisible();
-  await challengeFourPage.profileBtn.click();
+  await test.step('Profile interaction', async () => {
+    await expect(challengeFourPage.profileBtn).toBeVisible();
+    await challengeFourPage.profileBtn.click();
+  });
 
-  // Logout
-  await expect(challengeFourPage.logoutOption).toBeVisible();
-  await challengeFourPage.logoutOption.click();
+  await test.step('Logout', async () => {
+    await expect(challengeFourPage.logoutOption).toBeVisible();
+    await challengeFourPage.logoutOption.click();
+  });
 
-  // Verify we’re logged out (login form back in view)
-  await expect(challengeFourPage.email).toBeVisible();
+  await test.step('Verify logout returns to login form', async () => {
+    await expect(challengeFourPage.email).toBeVisible();
+  });
 });

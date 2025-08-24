@@ -1,5 +1,5 @@
 // e2e/fixtures/testFixtures.ts
-// Custom Playwright fixtures scaffold
+// Custom Playwright fixtures scaffold with basePage
 
 import { test as base } from '@playwright/test';
 
