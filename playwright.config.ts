@@ -1,4 +1,7 @@
+import * as dotenv from 'dotenv';
 import { defineConfig, devices } from '@playwright/test';
+
+dotenv.config({ path: require('path').resolve(__dirname, 'e2e/.env'), quiet: true });
 
 const BASE_URL = 'http://localhost:3000';
 export default defineConfig({
@@ -7,7 +10,7 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 3 : 4, // Changed to 4 for local parallel runs
-  reporter: [['html', { open: 'never' }], ['dot'], ['list']], // Added List for execution visibility
+  reporter: [['html', { open: 'never' }], ['dot']], // Added List for execution visibility
   timeout: 2 * 60 * 1000,
   expect: {
     timeout: 5 * 1000,

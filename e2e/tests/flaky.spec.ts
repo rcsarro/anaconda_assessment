@@ -1,5 +1,9 @@
+
 import { expect } from '@playwright/test';
 import { test } from '../fixtures/testFixtures';
+
+// Load test user password from environment
+const userPassword = process.env.USER_PASSWORD;
 
 //Navigate to baseUrl before each test
 test.beforeEach(async ({ page }) => {
@@ -8,65 +12,35 @@ test.beforeEach(async ({ page }) => {
 
 //Fix the below scripts to work consistently and do not use static waits. Add proper assertions to the tests
 // Login 3 times sucessfully
-test('Login multiple times successfully @c1', async ({ page, basePage }) => {
+test('Login multiple times successfully @c1', async ({ basePage }) => {
   await test.step('Navigate to Challenge 1 page', async () => {
-    await Promise.all([
-      page.waitForURL('**/challenge1.html'),
-      basePage.challengeOneLink.click(),
-    ]);
-    await expect(page).toHaveURL(/challenge1\.html$/);
+    await basePage.gotoChallenge(basePage.challengeOneLink, /challenge1\.html$/);
   });
 
   await test.step('Perform 3 successful login attempts and assert success messages', async () => {
-    await basePage.loginMultipleTimes(3);
+    await basePage.loginMultipleTimes(3, userPassword!);
   });
 });
 
 
 // Login and logout successfully with animated form and delayed loading
-test('Login animated form and logout sucessfully @c2', async ({ page, basePage, challengeTwoPage }) => {
+test('Login animated form and logout sucessfully @c2', async ({ basePage, challengeTwoPage }) => {
 
   await test.step('Navigate to Challenge 2 page', async () => {
-    await Promise.all([
-      page.waitForURL('**/challenge2.html'),
-      basePage.challengeTwoLink.click(),
-    ]);
-    await expect(page).toHaveURL(/challenge2\.html$/);
+    await basePage.gotoChallenge(basePage.challengeTwoLink, /challenge2\.html$/);
   });
 
   await test.step('Login with animated form', async () => {
-    const emailVal = `test@example.com`;
-    const passwordVal = `password`;
-    await expect(basePage.email).toBeVisible();
-    await expect(basePage.password).toBeVisible();
-    await basePage.email.fill(emailVal);
-    await basePage.password.fill(passwordVal);
-    await expect(basePage.submit).toBeVisible();
-    await basePage.submit.evaluate(el =>
-      Promise.all((el.getAnimations?.({ subtree: true }) ?? []).map(a => a.finished.catch(() => {})))
-    );
-    await basePage.submit.click();
+    await basePage.login('test@example.com', userPassword!);
   });
 
   await test.step('Open menu and logout', async () => {
-    // Wait for menu button to be enabled and visible before clicking
     await expect(challengeTwoPage.menuBtn).toBeVisible();
     await expect(challengeTwoPage.menuBtn).toBeEnabled();
-    // Wait for menu button to be initialized (menuClickable = true)
-    await expect(challengeTwoPage.menuBtn).toHaveAttribute('data-initialized', 'true');
+    await basePage.waitForMenuInitialized(challengeTwoPage.menuBtn);
     await challengeTwoPage.menuBtn.click();
-    // Wait for logoutOption to become truly visible after menu opens (not just in DOM)
-    await page.waitForFunction(() => {
-      const el = document.querySelector('#logoutOption');
-      if (!el) return false;
-      const style = window.getComputedStyle(el);
-      return style.visibility !== 'hidden' && style.display !== 'none' && el.offsetParent !== null;
-    });
     await expect(challengeTwoPage.logoutOption).toBeVisible();
-    await challengeTwoPage.logoutOption.evaluate(el =>
-      Promise.all((el.getAnimations?.({ subtree: true }) ?? []).map(a => a.finished.catch(() => {})))
-    );
-    await challengeTwoPage.logoutOption.click();
+    await basePage.logout(challengeTwoPage.logoutOption, challengeTwoPage.email);
   });
 
   await test.step('Verify logout returns to login form', async () => {
@@ -77,11 +51,7 @@ test('Login animated form and logout sucessfully @c2', async ({ page, basePage, 
 // Fix the Forgot password test and add proper assertions
 test('Forgot password @c3', async ({ page, basePage, challengeThreePage }) => {
   await test.step('Navigate to Challenge 3 page', async () => {
-    await Promise.all([
-      page.waitForURL('**/challenge3.html'),
-      basePage.challengeThreeLink.click(),
-    ]);
-    await expect(page).toHaveURL(/challenge3\.html$/);
+    await basePage.gotoChallenge(basePage.challengeThreeLink, /challenge3\.html$/);
   });
 
   await test.step('Open forgot password form and fill email', async () => {
@@ -108,11 +78,7 @@ test('Forgot password @c3', async ({ page, basePage, challengeThreePage }) => {
 //Fix the login test. Hint: There is a global variable that you can use to check if the app is in ready state
 test('Login and logout @c4', async ({ page, basePage, challengeFourPage }) => {
   await test.step('Navigate to Challenge 4 page', async () => {
-    await Promise.all([
-      page.waitForURL('**/challenge4.html'),
-      basePage.challengeFourLink.click(),
-    ]);
-    await expect(page).toHaveURL(/challenge4\.html$/);
+    await basePage.gotoChallenge(basePage.challengeFourLink, /challenge4\.html$/);
   });
 
   await test.step('Wait for application ready state', async () => {
@@ -120,12 +86,7 @@ test('Login and logout @c4', async ({ page, basePage, challengeFourPage }) => {
   });
 
   await test.step('Login', async () => {
-    await expect(basePage.email).toBeVisible();
-    await expect(basePage.password).toBeVisible();
-    await basePage.email.fill('test@example.com');
-    await basePage.password.fill('password');
-    await expect(basePage.submit).toBeEnabled();
-    await basePage.submit.click();
+    await basePage.login('test@example.com', userPassword!);
   });
 
   await test.step('Profile interaction', async () => {
