@@ -12,6 +12,7 @@ export class BasePage {
   readonly email: Locator;
   readonly password: Locator;
   readonly submit: Locator;
+   readonly success: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -24,6 +25,7 @@ export class BasePage {
     this.email = page.locator('#email');
     this.password = page.locator('#password');
     this.submit = page.locator('#submitButton');
+    this.success = page.locator('#successMessage');
   }
   // Common methods or properties for all pages can go here
   //navigate to a specific challenge page

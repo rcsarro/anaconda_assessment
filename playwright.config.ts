@@ -7,7 +7,7 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 3 : 4, // Changed to 4 for local parallel runs
-  reporter: [['html', { open: 'never' }], ['dot']],
+  reporter: [['html', { open: 'never' }], ['dot'], ['list']],
   timeout: 2 * 60 * 1000,
   expect: {
     timeout: 5 * 1000,

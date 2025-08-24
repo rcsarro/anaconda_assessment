@@ -13,7 +13,4 @@ export class ChallengeFourPage extends BasePage {
     this.logoutOption = page.locator('#logoutOption');
   }
 
-  // async goto() {
-  //   await this.page.goto('/challenge4.html');
-  // }
 }

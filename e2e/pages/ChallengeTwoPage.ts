@@ -11,8 +11,4 @@ export class ChallengeTwoPage extends BasePage {
     this.menuBtn = page.locator('#menuButton');
     this.logoutOption = page.locator('#logoutOption');
   }
-
-  // async goto() {
-  //   await this.page.goto('/challenge2.html');
-  // }
 }

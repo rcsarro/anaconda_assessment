@@ -15,8 +15,4 @@ export class ChallengeThreePage extends BasePage {
     this.emailInput = this.forgotForm.locator('#email');
     this.successMsg = page.locator('.success-message');
   }
-
-  // async goto() {
-  //   await this.page.goto('/challenge3.html');
-  // }
 }
