@@ -3,10 +3,10 @@ import { defineConfig, devices } from '@playwright/test';
 const BASE_URL = 'http://localhost:3000';
 export default defineConfig({
   testDir: './tests',
-  fullyParallel: false,
+  fullyParallel: true, //Changed to true for parallel test execution
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 3 : 1,
+  workers: process.env.CI ? 3 : 4, // Changed to 4 for local parallel runs
   reporter: [['html', { open: 'never' }], ['dot']],
   timeout: 2 * 60 * 1000,
   expect: {
@@ -25,17 +25,17 @@ export default defineConfig({
   },
 
   projects: [
-    {
-      name: 'chromium',
-      use: {
-        viewport: null,
-        launchOptions: {
-          args: ['--disable-web-security', '--start-maximized'],
-          slowMo: 0,
-          headless: false,
-        },
-      },
-    },
+    // {
+    //   name: 'chromium',
+    //   use: {
+    //     viewport: null,
+    //     launchOptions: {
+    //       args: ['--disable-web-security', '--start-maximized'],
+    //       slowMo: 0,
+    //       headless: false,
+    //     },
+    //   },
+    // },
 
     {
       name: 'chromiumheadless',
