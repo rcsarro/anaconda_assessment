@@ -1,5 +1,5 @@
 // Page Object for Challenge 1
-import { Page, Locator } from '@playwright/test';
+import { Page } from '@playwright/test';
 import { BasePage } from './BasePage';
 
 export class ChallengeOnePage extends BasePage {
