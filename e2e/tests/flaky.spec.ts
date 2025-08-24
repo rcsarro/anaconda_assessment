@@ -9,50 +9,18 @@ test.beforeEach(async ({ page }) => {
 //Fix the below scripts to work consistently and do not use static waits. Add proper assertions to the tests
 // Login 3 times sucessfully
 test('Login multiple times successfully @c1', async ({ page, basePage, challengeOnePage }) => {
-
   /* Promise.all 
-    - Avoids race conditions, guarentees navigation on Challange 1 page
+    - Avoids race conditions, guarantees navigation on Challenge 1 page
     - Ensures the test waits for the page to load before proceeding
   */
-  await Promise.all([ 
+  await Promise.all([
     page.waitForURL('**/challenge1.html'),
     basePage.challengeOneLink.click(),
   ]);
   await expect(page).toHaveURL(/challenge1\.html$/);
 
-  // Iterate through test1, test2 and test3
-  for (let i = 1; i <= 3; i++) {
-    const emailVal = `test${i}@example.com`;
-    const passwordVal = `password${i}`;
-    const success = challengeOnePage.success;
-
-    // Ensure banner is hidden before starting the next attempt (prevents stale text)
-    if (i > 1) {
-      await expect(success, 'Wait for prior success banner to hide').toBeHidden();
-    }
-
-    // Fill and submit login form
-    await expect(basePage.email).toBeVisible();
-    await expect(basePage.password).toBeVisible();
-    await basePage.email.fill(emailVal);
-    await basePage.password.fill(passwordVal);
-    await expect(basePage.submit).toBeEnabled();
-    await basePage.submit.click();
-
-    // Success message should appear for THIS attempt
-    await expect(success).toBeVisible();
-
-    // Assert the Success message reflects the current inputs in the correct order
-    const pattern = new RegExp(
-      [ //Used Regex101 to help build regex
-        'Successfully submitted!',
-        `Email:\\s*${emailVal.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\$&')}`,
-        `Password:\\s*${passwordVal.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\$&')}`,
-      ].join('[\\s\\S]*'),
-      'i'
-    );
-    await expect(success).toHaveText(pattern); 
-  }
+  // Use BasePage utility to perform login 3 times
+  await basePage.loginMultipleTimes(3);
 });
 
 
